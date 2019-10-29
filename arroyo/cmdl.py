@@ -21,6 +21,7 @@
 import argparse
 import json
 import sys
+from typing import *
 
 
 import arroyo
@@ -162,7 +163,7 @@ def main():
         parser.exit(1)
 
 
-def do_fetch(parser, args):
+def do_fetch(parser: argparse.ArgumentParser, args: argparse.Namespace):
     if not args.provider and not args.uri:
         parser.print_help()
         parser.exit(1)
@@ -174,7 +175,7 @@ def do_fetch(parser, args):
     args.output.write(result)
 
 
-def do_parse(parser, args):
+def do_parse(parser: argparse.ArgumentParser, args: argparse.Namespace):
     engine = scraper.Engine()
     ctx = scraper.build_context(arroyo.Loader(), args.provider,
                                 type=args.type, language=args.language)
@@ -186,7 +187,7 @@ def do_parse(parser, args):
     args.output.write(output)
 
 
-def do_scrape(parser, args):
+def do_scrape(parser: argparse.ArgumentParser, args: argparse.Namespace):
     if not args.provider and not args.uri:
         parser.print_help()
         parser.exit(1)
@@ -201,7 +202,7 @@ def do_scrape(parser, args):
     args.output.write(output)
 
 
-def do_normalize(parser, args):
+def do_normalize(parser: argparse.ArgumentParser, args: argparse.Namespace):
     raw = json.loads(args.input.read())
     if isinstance(raw, dict):
         raw = [raw]
@@ -214,7 +215,7 @@ def do_normalize(parser, args):
     args.output.write(output)
 
 
-def do_query(parser, args):
+def do_query(parser: argparse.ArgumentParser, args: argparse.Namespace):
     def _parse_queryparams(pairs):
         for pair in pairs:
             key, value = pair.split('=', 1)
@@ -248,7 +249,7 @@ def do_query(parser, args):
     args.output.write(output)
 
 
-def _json_encode_hook(value):
+def _json_encode_hook(value: Any) -> str:
     return str(value)
 
 

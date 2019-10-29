@@ -20,6 +20,7 @@
 
 import importlib
 import logging
+from typing import *
 
 
 from arroyo.extensions import Provider
@@ -48,29 +49,29 @@ _plugins = {
 
 
 class _ClassLoader:
-    def __init__(self, defs=None):
-        self._reg = {}
+    def __init__(self, defs: Optional[Dict[str, type]] = None):
+        self._reg: Dict[str, type] = {}
         if defs:
             for (name, cls) in defs.items():
                 self.register(name, cls)
 
-    def resolve(self, clsstr):
+    def resolve(self, clsstr: str) -> type:
         parts = clsstr.split('.')
-        mod, cls = '.'.join(parts[0:-1]), parts[-1]
+        modname, clsname = '.'.join(parts[0:-1]), parts[-1]
 
-        if not mod:
+        if not modname:
             raise ValueError(clsstr)
 
-        mod = importlib.import_module(mod)
-        return getattr(mod, cls)
+        mod = importlib.import_module(modname)
+        return getattr(mod, clsname)
 
-    def register(self, name, target):
+    def register(self, name, target) -> None:
         self._reg[name] = target
 
-    def get(self, name, *args, **kwargs):
+    def get(self, name: str, *args, **kwargs) -> object:
         return self.get_class(name)(*args, **kwargs)
 
-    def get_class(self, name):
+    def get_class(self, name: str) -> type:
         cls = self._reg[name]
 
         if isinstance(cls, str):
@@ -82,7 +83,7 @@ class _ClassLoader:
 
         return cls
 
-    def list(self, ns=''):
+    def list(self, ns: str = '') -> List[str]:
         if ns:
             prefix = ns + '.'
 
@@ -97,10 +98,7 @@ class Loader(_ClassLoader):
         super().__init__(_plugins)
 
 
-_loggers = {}
-
-
-def getLogger(name):
+def getLogger(name: str) -> logging.Logger:
     global _loggers
 
     if not _loggers:
@@ -110,3 +108,10 @@ def getLogger(name):
         _loggers[name] = logging.getLogger(name)
 
     return _loggers[name]
+
+
+# global variables can't have annotations, may related to this bug:
+# https://bugs.python.org/issue34939.
+# This should be
+# _loggers: Dict[str, logging.Logger] = {}
+_loggers = {}  # type: ignore
